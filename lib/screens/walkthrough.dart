@@ -33,13 +33,16 @@ class SocialWalkThroughState extends State<SocialWalkThrough> {
                       fontFamily: fontBold, fontSize: textSizeLarge),
                   SizedBox(height: spacing_xxLarge),
                   CachedNetworkImage(
-                      imageUrl: "https://image.freepik.com/free-vector/conversation-concept-illustration-flat-style-communication-chat-conversation_198838-120.jpg", height: width * 0.55),
+                      imageUrl:
+                          "https://image.freepik.com/free-vector/conversation-concept-illustration-flat-style-communication-chat-conversation_198838-120.jpg",
+                      height: width * 0.55),
                   SizedBox(height: spacing_xxLarge),
                   Container(
                     margin: EdgeInsets.only(
                         left: spacing_standard_new,
                         right: spacing_standard_new),
-                    child: text("Read our Privacy Policy. Tap Agree and Continue to accept the Terms of Services.",
+                    child: text(
+                        "Read our Privacy Policy. Tap Agree and Continue to accept the Terms of Services.",
                         isLongText: true,
                         textColor: social_textColorSecondary,
                         isCentered: true),
@@ -52,9 +55,9 @@ class SocialWalkThroughState extends State<SocialWalkThrough> {
                     child: SocialAppButton(
                       onPressed: () {
                         Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => SocialSignIn()));
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SocialSignIn()));
                       },
                       textContent: "Agree & Continue",
                     ),
