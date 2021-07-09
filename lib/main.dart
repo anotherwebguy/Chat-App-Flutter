@@ -1,7 +1,18 @@
+import 'package:chatapp/screens/dashboard.dart';
 import 'package:chatapp/screens/walkthrough.dart';
+import 'package:chatapp/services/dbdata.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+  }catch (e) {
+    print(e);
+  }
+  await Firebase.initializeApp();
+  await getUser();
   runApp(MyApp());
 }
 
@@ -15,7 +26,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: SocialWalkThrough(),
+      home: FirebaseAuth.instance.currentUser!=null ? SocialDashboard() : SocialWalkThrough(),
     );
   }
 }

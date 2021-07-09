@@ -1,3 +1,5 @@
+import 'package:chatapp/auth/authentication.dart';
+import 'package:chatapp/screens/settings.dart';
 import 'package:chatapp/utils/colors.dart';
 import 'package:chatapp/utils/constants.dart';
 import 'package:chatapp/utils/extensions.dart';
@@ -78,7 +80,6 @@ Widget SocialOption(BuildContext context, var color, var icon, var value, var su
   var width = MediaQuery.of(context).size.width;
   return GestureDetector(
     onTap: () {
-      launchScreen(context, tags);
     },
     child: Row(
       children: <Widget>[
@@ -127,7 +128,15 @@ Widget mToolbar(BuildContext context, var title, var icon, {var tags}) {
         ),
         GestureDetector(
           onTap: () {
-            launchScreen(context, tags);
+            if(tags=="SocialSetting"){
+              Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SocialSetting()));
+            } else if(tags=="logout"){
+              AuthServices _auth = new AuthServices();
+              _auth.signOut(context);
+            }
           },
           child: Container(
               margin: EdgeInsets.only(right: spacing_standard_new),
@@ -204,4 +213,36 @@ class SocialBtnState extends State<SocialBtn> {
       ),
     );
   }
+}
+
+TextStyle primaryTextStyle1(
+    {int size = 16, Color textColor = const Color(0xFF000000)}) {
+  return TextStyle(
+    fontSize: size.toDouble(),
+    color: textColor,
+  );
+}
+
+TextStyle secondaryTextStyle(
+    {int size = 14, Color textColor = const Color(0xFF757575)}) {
+  return TextStyle(
+    fontSize: size.toDouble(),
+    color: textColor,
+  );
+}
+
+
+BoxDecoration boxDecorations(
+    {double radius = 8,
+      Color color = Colors.transparent,
+      Color bgColor = Colors.white,
+      var showShadow = false}) {
+  return BoxDecoration(
+      color: bgColor,
+      //gradient: LinearGradient(colors: [bgColor, whiteColor]),
+      boxShadow: showShadow
+          ? [BoxShadow(color:  Color(0x95E9EBF0), blurRadius: 10, spreadRadius: 2)]
+          : [BoxShadow(color: Colors.transparent)],
+      border: Border.all(color: color),
+      borderRadius: BorderRadius.all(Radius.circular(radius)));
 }

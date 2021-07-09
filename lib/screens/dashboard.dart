@@ -1,3 +1,6 @@
+import 'package:chatapp/screens/homechats.dart';
+import 'package:chatapp/screens/homestatus.dart';
+import 'package:chatapp/screens/searchusers.dart';
 import 'package:chatapp/utils/colors.dart';
 import 'package:chatapp/utils/constants.dart';
 import 'package:chatapp/utils/extensions.dart';
@@ -35,8 +38,19 @@ class SocialDashboardState extends State<SocialDashboard> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Image.asset("images/social_fab_edit.png", width: width * 0.2, height: width * 0.2),
-                    Image.asset("images/social_fab_msg.png", width: width * 0.2, height: width * 0.2),
+                    GestureDetector(
+                        onTap: () {},
+                        child: Image.asset("images/social_fab_edit.png",
+                            width: width * 0.2, height: width * 0.2)),
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Search()));
+                        },
+                        child: Image.asset("images/social_fab_msg.png",
+                            width: width * 0.2, height: width * 0.2)),
                   ],
                 ),
               )
@@ -44,19 +58,26 @@ class SocialDashboardState extends State<SocialDashboard> {
                 width: width * 0.2,
                 height: width * 0.2,
                 alignment: Alignment.bottomRight,
-                child: Image.asset("images/social_fab_msg.png"),
+                child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Search()));
+                    },
+                    child: Image.asset("images/social_fab_msg.png")),
               ),
         backgroundColor: social_app_background_color,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              mToolbar(context, "INMOOD", "images/social_ic_setting.svg"),
+              mToolbar(context, "INMOOD", "images/social_ic_setting.svg",
+                  tags: "SocialSetting"),
               SizedBox(height: spacing_standard_new),
               Container(
                 width: width,
                 decoration: boxDecoration(showShadow: true),
-                margin: EdgeInsets.only(right: spacing_standard_new, left: spacing_standard_new),
+                margin: EdgeInsets.only(
+                    right: spacing_standard_new, left: spacing_standard_new),
                 child: Row(
                   children: <Widget>[
                     Flexible(
@@ -72,13 +93,18 @@ class SocialDashboardState extends State<SocialDashboard> {
                             "Chats",
                             fontFamily: fontMedium,
                             isCentered: true,
-                            textColor: selectedPos == 1 ? social_textColorPrimary : social_textColorSecondary,
+                            textColor: selectedPos == 1
+                                ? social_textColorPrimary
+                                : social_textColorSecondary,
                           ),
                         ),
                       ),
                       flex: 1,
                     ),
-                    Container(width: 1, height: width * 0.1, color: social_view_color),
+                    Container(
+                        width: 1,
+                        height: width * 0.1,
+                        color: social_view_color),
                     Flexible(
                       child: GestureDetector(
                         onTap: () {
@@ -88,7 +114,12 @@ class SocialDashboardState extends State<SocialDashboard> {
                         child: Container(
                           padding: EdgeInsets.all(10.0),
                           width: width,
-                          child: text("Status", isCentered: true, fontFamily: fontMedium, textColor: selectedPos == 2 ? social_textColorPrimary : social_textColorSecondary),
+                          child: text("Status",
+                              isCentered: true,
+                              fontFamily: fontMedium,
+                              textColor: selectedPos == 2
+                                  ? social_textColorPrimary
+                                  : social_textColorSecondary),
                         ),
                       ),
                       flex: 1,
@@ -97,8 +128,8 @@ class SocialDashboardState extends State<SocialDashboard> {
                 ),
               ),
               SizedBox(height: spacing_standard),
-              // if (selectedPos == 1) SocialHomeChats(),
-              // if (selectedPos == 2) SocialHomeStatus(),
+              if (selectedPos == 1) SocialHomeChats(),
+              //if (selectedPos == 2) SocialHomeStatus(),
             ],
           ),
         ));

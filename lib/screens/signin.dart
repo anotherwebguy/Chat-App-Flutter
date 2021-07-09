@@ -1,3 +1,4 @@
+import 'package:chatapp/auth/authentication.dart';
 import 'package:chatapp/screens/dashboard.dart';
 import 'package:chatapp/screens/loading.dart';
 import 'package:chatapp/screens/userdetails.dart';
@@ -21,9 +22,10 @@ class SocialSignIn extends StatefulWidget {
 
 class SocialSignInState extends State<SocialSignIn> {
   final _formKey = GlobalKey<FormState>();
-  String error = "", userOtp = "", otpError = "", phoneNo = "";
+  String error = "",userOtp = "", otpError = "", phoneNo = "";
   bool _loading = false;
   TextEditingController phone = new TextEditingController();
+  AuthServices _auth = new AuthServices();
 
   Future<void> loadDialog(TextEditingController phone) async {
     return showDialog<void>(
@@ -69,7 +71,7 @@ class SocialSignInState extends State<SocialSignIn> {
           User user = result.user;
 
           if (user != null) {
-            Navigator.of(context).pop();
+            print("1");
             await getUser().then((value) => existence == true
                 ? Navigator.pushAndRemoveUntil(
                     context,
@@ -195,6 +197,7 @@ class SocialSignInState extends State<SocialSignIn> {
                           alignment: Alignment.center,
                           child: FlatButton(
                             onPressed: () async {
+                             // Navigator.pop(context);
                               setState(() => {
                                     otpError = "",
                                   });
@@ -214,25 +217,15 @@ class SocialSignInState extends State<SocialSignIn> {
                                 setState(() => {
                                       _loading = true,
                                     });
-                                Navigator.of(context).pop();
 
-                                Future.delayed(const Duration(seconds: 2),
+                                Future.delayed(const Duration(seconds: 5),
                                     () async {
-                                  await getUser().then((value) => existence ==
-                                          true
-                                      ? Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SocialDashboard()),
-                                          (route) => false)
-                                      : Navigator.pushAndRemoveUntil(
+                                      Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) => UserDetails(
                                                     phone: phone.text,
-                                                  )),
-                                          (route) => false));
+                                                  )),);
                                 });
                               } else {
                                 setState(() =>
@@ -262,7 +255,7 @@ class SocialSignInState extends State<SocialSignIn> {
     changeStatusColor(social_white);
     return Scaffold(
       backgroundColor: social_app_background_color,
-      body: _loading? Loading("Signing In"):SafeArea(
+      body:_loading?Loading("Signing in"):SafeArea(
           child: Stack(
         children: <Widget>[
           Column(
@@ -344,7 +337,7 @@ class SocialSignInState extends State<SocialSignIn> {
                               if (_formKey.currentState.validate()) {
                                 setState(() => error = "");
                                 loadDialog(phone);
-                                _verifyPhone(phone, context);
+                                _verifyPhone(phone,context);
                               } else {
                                 setState(() => error =
                                     "Please enter a valid Phone Number");
