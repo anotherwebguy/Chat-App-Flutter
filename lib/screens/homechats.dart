@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chatapp/screens/chatting.dart';
+import 'package:chatapp/services/dbdata.dart';
 import 'package:chatapp/utils/colors.dart';
 import 'package:chatapp/utils/constants.dart';
 import 'package:chatapp/utils/widgets.dart';
@@ -13,9 +15,76 @@ class SocialHomeChats extends StatefulWidget {
 }
 
 class SocialHomeChatsState extends State<SocialHomeChats> {
+  Stream usersStream, chatRoomsStream;
+
+  getChatRoomIdByUid(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
+
+  getChatRooms() async {
+    chatRoomsStream = await getChatRooms();
+    setState(() {});
+  }
+
+  Widget chatRoomsList() {
+    return StreamBuilder(
+      stream: chatRoomsStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text('We got an Error ${snapshot.error}');
+        }
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return Center(
+              child: Container(
+                child: Theme(
+                  data: ThemeData.light(),
+                  child: CupertinoActivityIndicator(
+                    animating: true,
+                    radius: 20,
+                  ),
+                ),
+              ),
+            );
+
+          case ConnectionState.none:
+            return Text('oops no data');
+
+          case ConnectionState.done:
+            return Text('We are Done');
+          default:
+            return Container(
+              decoration: boxDecoration(radius: spacing_middle),
+              padding: EdgeInsets.all(spacing_middle),
+              child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  itemCount: snapshot.data.docs.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    DocumentSnapshot chatlist = snapshot.data.docs[index];
+                    print(snapshot.data.docs[index].id);
+                    return Chats(
+                      lastMessage: chatlist.data()["lastMessage"],
+                      chatRoomId: chatlist.id,
+                      myUsername: FirebaseAuth.instance.currentUser.uid,
+                      time: chatlist.data()["lastMessageSendTs"],
+                    );
+                  }),
+            );
+        }
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    getChatRooms();
   }
 
   var mFriendsLabel = text("Recents", fontFamily: fontMedium);
@@ -35,52 +104,7 @@ class SocialHomeChatsState extends State<SocialHomeChats> {
               ),
               Column(
                 children: [
-                  StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .where("uid", isNotEqualTo: FirebaseAuth.instance.currentUser.uid)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return Text('We got an Error ${snapshot.error}');
-                        }
-                        switch (snapshot.connectionState) {
-                          case ConnectionState.waiting:
-                            return Center(
-                              child: Container(
-                                child: Theme(
-                                  data: ThemeData.light(),
-                                  child: CupertinoActivityIndicator(
-                                    animating: true,
-                                    radius: 20,
-                                  ),
-                                ),
-                              ),
-                            );
-
-                          case ConnectionState.none:
-                            return Text('oops no data');
-
-                          case ConnectionState.done:
-                            return Text('We are Done');
-                          default:
-                            return Container(
-                              decoration: boxDecoration(radius: spacing_middle),
-                              padding: EdgeInsets.all(spacing_middle),
-                              child: ListView.builder(
-                                  scrollDirection: Axis.vertical,
-                                  itemCount: snapshot.data.docs.length,
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemBuilder: (context, index) {
-                                    DocumentSnapshot chatlist =
-                                        snapshot.data.docs[index];
-                                    print(snapshot.data.docs[index].id);
-                                    return Chats(name: chatlist.data()['username'],status: chatlist.data()['status'],time: chatlist.data()['time'],img: chatlist.data()['profileimg'] ,);
-                                  }),
-                            );
-                        }
-                      }),
+                  chatRoomsList(),
                 ],
               ),
               SizedBox(
@@ -94,10 +118,34 @@ class SocialHomeChatsState extends State<SocialHomeChats> {
   }
 }
 
-class Chats extends StatelessWidget {
-  String name,status,time,img;
+class Chats extends StatefulWidget {
+  final String lastMessage, chatRoomId, myUsername,time;
+  Chats({this.lastMessage, this.chatRoomId, this.myUsername,this.time});
 
-  Chats({this.name,this.status,this.time,this.img});
+  @override
+  _ChatsState createState() => _ChatsState();
+}
+
+class _ChatsState extends State<Chats> {
+
+  String profilePicUrl = "", name = "", username = "";
+
+  getThisUserInfo() async {
+    username =
+        widget.chatRoomId.replaceAll(widget.myUsername, "").replaceAll("_", "");
+    QuerySnapshot querySnapshot = await getUserInfo(username);
+    print(
+        "something bla bla ${querySnapshot.docs[0].id} ${querySnapshot.docs[0]["username"]}  ${querySnapshot.docs[0]["profileimg"]}");
+    name = "${querySnapshot.docs[0]["username"]}";
+    profilePicUrl = "${querySnapshot.docs[0]["profileimg"]}";
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    getThisUserInfo();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +153,8 @@ class Chats extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         //launchScreen(context, SocialChatting.tag);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => SocialChatting()));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: spacing_standard_new),
@@ -120,7 +170,7 @@ class Chats extends StatelessWidget {
                       child: Container(
                         color: social_dark_gray,
                         child: CachedNetworkImage(
-                          imageUrl: img, ////addimage
+                          imageUrl: profilePicUrl, ////addimage
                           height: width * 0.13,
                           width: width * 0.13,
                           fit: BoxFit.fill,
@@ -133,9 +183,11 @@ class Chats extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        text(name, fontFamily: fontMedium),///add name
+                        text(name, fontFamily: fontMedium),
+
+                        ///add name
                         text(
-                          status,              ///addd last msg
+                          widget.lastMessage,
                           textColor: social_textColorSecondary,
                         )
                       ],
@@ -145,8 +197,8 @@ class Chats extends StatelessWidget {
               ),
             ),
             SizedBox(width: spacing_standard),
-            text(time,
-                fontFamily: fontMedium, fontSize: textSizeSMedium),/// last msg time
+            text(widget.time, fontFamily: fontMedium, fontSize: textSizeSMedium),
+            /// last msg time
           ],
         ),
       ),

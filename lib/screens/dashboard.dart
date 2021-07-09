@@ -129,7 +129,7 @@ class SocialDashboardState extends State<SocialDashboard> {
               ),
               SizedBox(height: spacing_standard),
               if (selectedPos == 1) SocialHomeChats(),
-              //if (selectedPos == 2) SocialHomeStatus(),
+              if (selectedPos == 2) SocialHomeStatus(),
             ],
           ),
         ));

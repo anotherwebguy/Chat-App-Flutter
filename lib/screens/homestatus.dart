@@ -112,7 +112,7 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
                 children: [
                   StreamBuilder(
                       stream: FirebaseFirestore.instance
-                          .collection('users')
+                          .collection('status')
                           .where("uid", isNotEqualTo:FirebaseAuth.instance.currentUser.uid)
                           .snapshots(),
                       builder: (context, snapshot) {

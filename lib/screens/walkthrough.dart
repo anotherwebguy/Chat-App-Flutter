@@ -29,8 +29,14 @@ class SocialWalkThroughState extends State<SocialWalkThrough> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  text("Welcome to CHATAPP",
-                      fontFamily: fontBold, fontSize: textSizeLarge),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      text("Welcome to ",
+                          fontFamily: fontBold, fontSize: textSizeLarge),
+                      Image.asset("images/walk.png",height: 50,width: 150,)    
+                    ],
+                  ),
                   SizedBox(height: spacing_xxLarge),
                   CachedNetworkImage(
                       imageUrl:

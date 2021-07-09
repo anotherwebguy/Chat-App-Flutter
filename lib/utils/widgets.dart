@@ -111,7 +111,7 @@ Widget mToolbar(BuildContext context, var title, var icon, {var tags}) {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        GestureDetector(
+        title=="INMOOD"? Container():GestureDetector(
           onTap: () {
             back(context);
           },
@@ -124,7 +124,12 @@ Widget mToolbar(BuildContext context, var title, var icon, {var tags}) {
           ),
         ),
         Center(
-          child: text(title, fontFamily: fontBold, fontSize: textSizeLargeMedium, textAllCaps: true),
+          child: title=="INMOOD"? Row(
+            children: [
+              SizedBox(width:22),
+              Image.asset("images/walk.png",height: 40,width: 150,),
+            ],
+          ):text(title, fontFamily: fontBold, fontSize: textSizeLargeMedium, textAllCaps: true),
         ),
         GestureDetector(
           onTap: () {
