@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SocialHomeChats extends StatefulWidget {
   @override
@@ -119,7 +120,8 @@ class SocialHomeChatsState extends State<SocialHomeChats> {
 }
 
 class Chats extends StatefulWidget {
-  final String lastMessage, chatRoomId, myUsername, time;
+  final String lastMessage, chatRoomId, myUsername;
+  Timestamp time;
   Chats({this.lastMessage, this.chatRoomId, this.myUsername, this.time});
 
   @override
@@ -127,7 +129,8 @@ class Chats extends StatefulWidget {
 }
 
 class _ChatsState extends State<Chats> {
-  String profilePicUrl = "", name = "", username = "",phone="";
+  String profilePicUrl = "", name = "", username = "", phone = "";
+  String val="",msgtime="";
 
   getThisUserInfo() async {
     username =
@@ -137,12 +140,16 @@ class _ChatsState extends State<Chats> {
         "something bla bla ${querySnapshot.docs[0].id} ${querySnapshot.docs[0]["username"]}  ${querySnapshot.docs[0]["profileimg"]}");
     name = "${querySnapshot.docs[0]["username"]}";
     profilePicUrl = "${querySnapshot.docs[0]["profileimg"]}";
-    phone="${querySnapshot.docs[0]["phone"]}";
+    phone = "${querySnapshot.docs[0]["phone"]}";
     setState(() {});
   }
 
   @override
   void initState() {
+    var date = DateTime.fromMillisecondsSinceEpoch(widget.time.millisecondsSinceEpoch);    
+    val=date.hour<12?"AM":"PM";
+    msgtime=date.hour.toString()+" : "+date.minute.toString()+" "+val;
+    print(widget.time.toString()+"  "+msgtime);
     getThisUserInfo();
     super.initState();
   }
@@ -154,7 +161,14 @@ class _ChatsState extends State<Chats> {
       onTap: () {
         //launchScreen(context, SocialChatting.tag);
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SocialChatting(name: name,uid: username,phone:phone)));
+            context,
+            MaterialPageRoute(
+                builder: (context) => SocialChatting(
+                      name: name,
+                      uid: username,
+                      phone: phone,
+                      image: profilePicUrl,
+                    )));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: spacing_standard_new),
@@ -168,7 +182,11 @@ class _ChatsState extends State<Chats> {
                     onTap: () {
                       showDialog(
                         context: context,
-                        builder: (BuildContext context) => CustomImage(img: profilePicUrl,),
+                        builder: (BuildContext context) => Center(
+                          child: CustomImage(
+                            img: profilePicUrl,
+                          ),
+                        ),
                       );
                     },
                     child: ClipRRect(
@@ -194,10 +212,32 @@ class _ChatsState extends State<Chats> {
                         text(name, fontFamily: fontMedium),
 
                         ///add name
-                        text(
-                          widget.lastMessage,
-                          textColor: social_textColorSecondary,
-                        )
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              WidgetSpan(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: SvgPicture.asset(
+                                      "images/social_double_tick_indicator.svg",
+                                      color:social_textColorSecondary,
+                                      width: 16,
+                                      height: 16),
+                                ),
+                              ),
+                              TextSpan(
+                                  text: widget.lastMessage,
+                                  style: TextStyle(
+                                      fontSize: textSizeMedium,
+                                      color: social_textColorSecondary)),
+                            ],
+                          ),
+                        ),
+                        // text(
+                        //   widget.lastMessage,
+                        //   textColor: social_textColorSecondary,
+                        // )
                       ],
                     ),
                   )
@@ -205,7 +245,7 @@ class _ChatsState extends State<Chats> {
               ),
             ),
             SizedBox(width: spacing_standard),
-            text(widget.time,
+            text(msgtime.toString(),
                 fontFamily: fontMedium, fontSize: textSizeSMedium),
 
             /// last msg time
@@ -215,5 +255,3 @@ class _ChatsState extends State<Chats> {
     );
   }
 }
-
-

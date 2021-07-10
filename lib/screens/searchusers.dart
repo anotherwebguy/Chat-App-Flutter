@@ -149,12 +149,15 @@ class _SearchState extends State<Search> {
                                 DocumentSnapshot chatlist =
                                     snapshot.data.docs[index];
                                 print(snapshot.data.docs[index].id);
-                                return Chats(
-                                  name: chatlist.data()['username'],
-                                  status: chatlist.data()['status'],
-                                  img: chatlist.data()['profileimg'],
-                                  uid: chatlist.data()['uid'],
-                                  phn: chatlist.data()['phone'],
+                                return Padding(
+                                  padding: const EdgeInsets.only(left:10),
+                                  child: Chats(
+                                    name: chatlist.data()['username'],
+                                    status: chatlist.data()['status'],
+                                    img: chatlist.data()['profileimg'],
+                                    uid: chatlist.data()['uid'],
+                                    phn: chatlist.data()['phone'],
+                                  ),
                                 );
                               }),
                         );
@@ -204,7 +207,7 @@ class _ChatsState extends State<Chats> {
             context,
             MaterialPageRoute(
                 builder: (context) => SocialChatting(
-                    name: name, uid: widget.uid, phone: widget.phn)));
+                    name: name, uid: widget.uid, phone: widget.phn,image: widget.img,)));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: spacing_standard_new),

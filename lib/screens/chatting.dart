@@ -12,8 +12,8 @@ import 'package:random_string/random_string.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SocialChatting extends StatefulWidget {
-  String name,uid,phone;
-  SocialChatting({this.name,this.uid,this.phone});
+  String name,uid,phone,image;
+  SocialChatting({this.name,this.uid,this.phone,this.image});
 
   @override
   SocialChattingState createState() => SocialChattingState();
@@ -37,6 +37,7 @@ class SocialChattingState extends State<SocialChatting> {
     if (chatmessage.text != "") {
 
       var lastMessageTs = DateTime.now();
+      String message=chatmessage.text;
 
       Map<String, dynamic> messageInfoMap = {
         "message": chatmessage.text,
@@ -54,11 +55,11 @@ class SocialChattingState extends State<SocialChatting> {
 
       addMessage(chatRoomId, messageId, messageInfoMap).then((value) {
         Map<String, dynamic> lastMessageInfoMap = {
-          "lastMessage": chatmessage.text,
+          "lastMessage": message,
           "lastMessageSendTs": lastMessageTs,
           "lastMessageSendBy": FirebaseAuth.instance.currentUser.uid,
         };
-
+        messageId="";
         updateLastMessageSend(chatRoomId, lastMessageInfoMap);
       });
     }
@@ -71,6 +72,7 @@ class SocialChattingState extends State<SocialChatting> {
 
   @override
   void initState() {
+    chatRoomId = getChatRoomIdByUsernames(widget.uid, FirebaseAuth.instance.currentUser.uid);
     getAndSetMessages();
     super.initState();
   }
@@ -79,8 +81,11 @@ class SocialChattingState extends State<SocialChatting> {
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
 
-    Widget buildChatMessages(String msg, String type, String time,
+    Widget buildChatMessages(String msg, String type, Timestamp time,
         String fromid, String image, bool isRead) {
+      var date = DateTime.fromMillisecondsSinceEpoch(time.millisecondsSinceEpoch);    
+      String val=date.hour<12?"AM":"PM";
+      String msgtime=date.hour.toString()+" : "+date.minute.toString()+" "+val;
       if (fromid == FirebaseAuth.instance.currentUser.uid &&
           type == "message") {
         return Container(
@@ -115,13 +120,13 @@ class SocialChattingState extends State<SocialChatting> {
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: SvgPicture.asset(
                             "images/social_double_tick_indicator.svg",
-                            color: social_textColorSecondary,
+                            color: isRead? Colors.blue : social_textColorSecondary,
                             width: 16,
                             height: 16),
                       ),
                     ),
                     TextSpan(
-                        text: time,
+                        text: msgtime,
                         style: TextStyle(
                             fontSize: textSizeMedium,
                             color: social_textColorSecondary)),
@@ -204,7 +209,7 @@ class SocialChattingState extends State<SocialChatting> {
                               padding:
                                   const EdgeInsets.only(bottom: 14.0, left: 4),
                               child: Text(
-                                time,
+                                msgtime,
                                 style: TextStyle(fontSize: 12),
                               ),
                             ),
@@ -239,27 +244,6 @@ class SocialChattingState extends State<SocialChatting> {
         //             isLongText: true))
         //   ],
         // );
-      } else if (type == "Media") {
-        return Row(
-          children: <Widget>[
-            Container(
-                margin: EdgeInsets.only(left: spacing_standard_new),
-                padding: EdgeInsets.all(spacing_standard),
-                decoration: BoxDecoration(
-                    color: social_app_background_color,
-                    borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                        topLeft: Radius.circular(10))),
-                width: MediaQuery.of(context).size.width * 0.5,
-                child: text(msg,
-                    textColor: social_textColorPrimary,
-                    fontSize: textSizeMedium,
-                    maxLine: 3,
-                    fontFamily: fontMedium,
-                    isLongText: true))
-          ],
-        );
       } else {
         return SizedBox();
       }
@@ -274,10 +258,11 @@ class SocialChattingState extends State<SocialChatting> {
                   padding: EdgeInsets.only(bottom: 70, top: 16),
                   itemCount: snapshot.data.docs.length,
                   reverse: true,
+                  shrinkWrap: true,
                   itemBuilder: (context, index) {
                     DocumentSnapshot ds = snapshot.data.docs[index];
-                    return buildChatMessages(ds["message"], ds["type"],
-                        ds["ts"], ds["sendBy"], ds["imageUrl"], ds["isRead"]);
+                    return buildChatMessages(ds.data()["message"], ds.data()["type"],
+                        ds.data()["ts"], ds.data()["sendBy"], ds.data()["imageUrl"], ds.data()["isRead"]);
                   })
               : Center(child: CircularProgressIndicator());
         },
@@ -311,7 +296,7 @@ class SocialChattingState extends State<SocialChatting> {
               ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(spacing_middle)),
                 child: CachedNetworkImage(
-                    imageUrl: profileimg,
+                    imageUrl: widget.image,
                     height: width * 0.1,
                     width: width * 0.1,
                     fit: BoxFit.fill),
@@ -321,7 +306,7 @@ class SocialChattingState extends State<SocialChatting> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  text(name, fontFamily: fontMedium),
+                  text(widget.name, fontFamily: fontMedium),
                 ],
               )
             ],

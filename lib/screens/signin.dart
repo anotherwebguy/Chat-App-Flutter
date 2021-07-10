@@ -207,15 +207,18 @@ class SocialSignInState extends State<SocialSignIn> {
                                       verificationId: verificationId,
                                       smsCode: userOtp);
 
-                              UserCredential result = await _auth
+                              await _auth
                                   .signInWithCredential(credential)
                                   .then((result) async {
                                 if (result != null) {
+                                  print(result.toString()+" ok");
                                   setState(() => {
                                         _loading = true,
                                       });
                                   await getUser();
-                                  if (name == null && email == null) {
+                                  print(email);
+                                  if (name == null || email == null || profileimg==null) {
+                                    print("in");
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
