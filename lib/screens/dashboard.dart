@@ -8,6 +8,7 @@ import 'package:chatapp/utils/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:nb_utils/nb_utils.dart';
 
 class SocialDashboard extends StatefulWidget {
   static String tag = '/SocialDashboard';
@@ -17,12 +18,12 @@ class SocialDashboard extends StatefulWidget {
 }
 
 class SocialDashboardState extends State<SocialDashboard> {
-  int selectedPos = 1;
+  int selectedPos = 0;
 
   @override
   void initState() {
     super.initState();
-    selectedPos = 1;
+    selectedPos = 0;
   }
 
   @override
@@ -32,7 +33,7 @@ class SocialDashboardState extends State<SocialDashboard> {
     changeStatusColor(social_white);
 
     return Scaffold(
-        floatingActionButton: selectedPos == 2
+        floatingActionButton: selectedPos == 1
             ? Container(
                 alignment: Alignment.bottomRight,
                 child: Column(
@@ -72,64 +73,81 @@ class SocialDashboardState extends State<SocialDashboard> {
             children: <Widget>[
               mToolbar(context, "INMOOD", "images/social_ic_setting.svg",
                   tags: "SocialSetting"),
-              SizedBox(height: spacing_standard_new),
+              SizedBox(height: spacing_standard_new-13),
               Container(
-                width: width,
-                decoration: boxDecoration(showShadow: true),
-                margin: EdgeInsets.only(
-                    right: spacing_standard_new, left: spacing_standard_new),
-                child: Row(
-                  children: <Widget>[
-                    Flexible(
-                      child: GestureDetector(
-                        onTap: () {
-                          selectedPos = 1;
-                          setState(() {});
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(10.0),
-                          width: width,
-                          child: text(
-                            "Chats",
-                            fontFamily: fontMedium,
-                            isCentered: true,
-                            textColor: selectedPos == 1
-                                ? social_textColorPrimary
-                                : social_textColorSecondary,
-                          ),
-                        ),
-                      ),
-                      flex: 1,
-                    ),
-                    Container(
-                        width: 1,
-                        height: width * 0.1,
-                        color: social_view_color),
-                    Flexible(
-                      child: GestureDetector(
-                        onTap: () {
-                          selectedPos = 2;
-                          setState(() {});
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(10.0),
-                          width: width,
-                          child: text("Status",
-                              isCentered: true,
-                              fontFamily: fontMedium,
-                              textColor: selectedPos == 2
-                                  ? social_textColorPrimary
-                                  : social_textColorSecondary),
-                        ),
-                      ),
-                      flex: 1,
-                    ),
-                  ],
-                ),
-              ),
+              width: MediaQuery.of(context).size.width,
+              padding: const EdgeInsets.all(16.0),
+              child: CupertinoSlidingSegmentedControl(
+                  children: {
+                    0: Container(
+                        padding: EdgeInsets.all(8), child: Text('Chats', style: primaryTextStyle(color: selectedPos== 0 ? blackColor: grey),)),
+                    1: Container(
+                        padding: EdgeInsets.all(8), child: Text('Status',style: primaryTextStyle(color: selectedPos== 1 ? blackColor: grey))),
+                  },
+                  groupValue: selectedPos,
+                  onValueChanged: (newValue) {
+                    setState(() {
+                      selectedPos = newValue;
+                    });
+                  }),
+            ),
+              // Container(
+              //   width: width,
+              //   decoration: boxDecoration(showShadow: true),
+              //   margin: EdgeInsets.only(
+              //       right: spacing_standard_new, left: spacing_standard_new),
+              //   child: Row(
+              //     children: <Widget>[
+              //       Flexible(
+              //         child: GestureDetector(
+              //           onTap: () {
+              //             selectedPos = 0;
+              //             setState(() {});
+              //           },
+              //           child: Container(
+              //             padding: EdgeInsets.all(10.0),
+              //             width: width,
+              //             child: text(
+              //               "Chats",
+              //               fontFamily: fontMedium,
+              //               isCentered: true,
+              //               textColor: selectedPos == 0
+              //                   ? social_textColorPrimary
+              //                   : social_textColorSecondary,
+              //             ),
+              //           ),
+              //         ),
+              //         flex: 1,
+              //       ),
+              //       Container(
+              //           width: 1,
+              //           height: width * 0.1,
+              //           color: social_view_color),
+              //       Flexible(
+              //         child: GestureDetector(
+              //           onTap: () {
+              //             selectedPos = 1;
+              //             setState(() {});
+              //           },
+              //           child: Container(
+              //             padding: EdgeInsets.all(10.0),
+              //             width: width,
+              //             child: text("Status",
+              //                 isCentered: true,
+              //                 fontFamily: fontMedium,
+              //                 textColor: selectedPos == 1
+              //                     ? social_textColorPrimary
+              //                     : social_textColorSecondary),
+              //           ),
+              //         ),
+              //         flex: 1,
+              //       ),
+              //     ],
+              //   ),
+              // ),
               SizedBox(height: spacing_standard),
-              if (selectedPos == 1) SocialHomeChats(),
-              if (selectedPos == 2) SocialHomeStatus(),
+              if (selectedPos == 0) SocialHomeChats(),
+              if (selectedPos == 1) SocialHomeStatus(),
             ],
           ),
         ));

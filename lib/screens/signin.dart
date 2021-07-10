@@ -22,7 +22,7 @@ class SocialSignIn extends StatefulWidget {
 
 class SocialSignInState extends State<SocialSignIn> {
   final _formKey = GlobalKey<FormState>();
-  String error = "",userOtp = "", otpError = "", phoneNo = "";
+  String error = "", userOtp = "", otpError = "", phoneNo = "";
   bool _loading = false;
   TextEditingController phone = new TextEditingController();
   AuthServices _auth = new AuthServices();
@@ -197,7 +197,7 @@ class SocialSignInState extends State<SocialSignIn> {
                           alignment: Alignment.center,
                           child: FlatButton(
                             onPressed: () async {
-                             // Navigator.pop(context);
+                              // Navigator.pop(context);
                               setState(() => {
                                     otpError = "",
                                   });
@@ -207,30 +207,58 @@ class SocialSignInState extends State<SocialSignIn> {
                                       verificationId: verificationId,
                                       smsCode: userOtp);
 
-                              UserCredential result =
-                                  await _auth.signInWithCredential(credential);
+                              UserCredential result = await _auth
+                                  .signInWithCredential(credential)
+                                  .then((result) async {
+                                if (result != null) {
+                                  setState(() => {
+                                        _loading = true,
+                                      });
+                                  await getUser();
+                                  if (name == null && email == null) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => UserDetails(
+                                                phone: phone.text,
+                                              )),
+                                    );
+                                  } else {
+                                    Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                SocialDashboard()),
+                                        (route) => false);
+                                  }
+                                } else {
+                                  setState(() =>
+                                    otpError = "Please enter a valid OTP");
+                                }
+                              });
                               //await fetchData();
 
-                              User user = result.user;
+                              // User user = result.user;
 
-                              if (user != null) {
-                                setState(() => {
-                                      _loading = true,
-                                    });
+                              // if (user != null) {
+                              //   setState(() => {
+                              //         _loading = true,
+                              //       });
 
-                                Future.delayed(const Duration(seconds: 5),
-                                    () async {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => UserDetails(
-                                                    phone: phone.text,
-                                                  )),);
-                                });
-                              } else {
-                                setState(() =>
-                                    otpError = "Please enter a valid OTP");
-                              }
+                              //   Future.delayed(const Duration(seconds: 5),
+                              //       () async {
+                              //     Navigator.push(
+                              //       context,
+                              //       MaterialPageRoute(
+                              //           builder: (context) => UserDetails(
+                              //                 phone: phone.text,
+                              //               )),
+                              //     );
+                              //   });
+                              // } else {
+                              //   setState(() =>
+                              //       otpError = "Please enter a valid OTP");
+                              // }
                             },
                             textColor: Color(0xFFFFFFFF),
                             child: Text(
@@ -255,115 +283,119 @@ class SocialSignInState extends State<SocialSignIn> {
     changeStatusColor(social_white);
     return Scaffold(
       backgroundColor: social_app_background_color,
-      body:_loading?Loading("Signing in"):SafeArea(
-          child: Stack(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              mTop(context, "Phone Verification"),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    margin: EdgeInsets.only(
-                        left: spacing_standard_new,
-                        right: spacing_standard_new),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(height: spacing_large),
-                          Center(
-                              child: text("Welcome",
-                                  fontFamily: fontBold,
-                                  fontSize: textSizeLarge)),
-                          SizedBox(height: spacing_middle),
-                          text(
-                              "Enter your phone number to continue to inMood Messenger and enjoy messaging and calling to all your friend",
-                              isLongText: true,
-                              isCentered: true),
-                          SizedBox(height: spacing_large),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                decoration: boxDecoration(
-                                    showShadow: false,
-                                    bgColor: social_app_background_color,
-                                    radius: 8,
-                                    color: social_view_color),
-                                padding: EdgeInsets.all(0),
-                                child: CountryCodePicker(
-                                    onChanged: print,
-                                    showFlag: true,
-                                    padding: EdgeInsets.all(0)),
-                              ),
-                              SizedBox(width: spacing_standard_new),
-                              Expanded(
-                                child: Container(
-                                  decoration: boxDecoration(
-                                      showShadow: false,
-                                      bgColor: social_app_background_color,
-                                      radius: 8,
-                                      color: social_view_color),
-                                  padding: EdgeInsets.all(0),
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.number,
-                                    maxLength: 10,
-                                    style: TextStyle(
-                                        fontSize: textSizeLargeMedium,
-                                        fontFamily: fontRegular),
-                                    decoration: InputDecoration(
-                                      counterText: "",
-                                      contentPadding:
-                                          EdgeInsets.fromLTRB(16, 12, 16, 0),
-                                      hintText: "Mobile Number",
-                                      prefixIcon: Icon(Icons.call),
-                                      hintStyle: TextStyle(
-                                          color: social_textColorSecondary,
-                                          fontSize: textSizeMedium),
-                                      border: InputBorder.none,
+      body: _loading
+          ? Loading("Signing in")
+          : SafeArea(
+              child: Stack(
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    mTop(context, "Phone Verification"),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Container(
+                          margin: EdgeInsets.only(
+                              left: spacing_standard_new,
+                              right: spacing_standard_new),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                SizedBox(height: spacing_large),
+                                Center(
+                                    child: text("Welcome",
+                                        fontFamily: fontBold,
+                                        fontSize: textSizeLarge)),
+                                SizedBox(height: spacing_middle),
+                                text(
+                                    "Enter your phone number to continue to inMood Messenger and enjoy messaging and calling to all your friend",
+                                    isLongText: true,
+                                    isCentered: true),
+                                SizedBox(height: spacing_large),
+                                Row(
+                                  children: <Widget>[
+                                    Container(
+                                      decoration: boxDecoration(
+                                          showShadow: false,
+                                          bgColor: social_app_background_color,
+                                          radius: 8,
+                                          color: social_view_color),
+                                      padding: EdgeInsets.all(0),
+                                      child: CountryCodePicker(
+                                          onChanged: print,
+                                          showFlag: true,
+                                          padding: EdgeInsets.all(0)),
                                     ),
-                                    controller: phone,
-                                    validator: (val) =>
-                                        val.length != 10 ? "" : null,
-                                  ),
+                                    SizedBox(width: spacing_standard_new),
+                                    Expanded(
+                                      child: Container(
+                                        decoration: boxDecoration(
+                                            showShadow: false,
+                                            bgColor:
+                                                social_app_background_color,
+                                            radius: 8,
+                                            color: social_view_color),
+                                        padding: EdgeInsets.all(0),
+                                        child: TextFormField(
+                                          keyboardType: TextInputType.number,
+                                          maxLength: 10,
+                                          style: TextStyle(
+                                              fontSize: textSizeLargeMedium,
+                                              fontFamily: fontRegular),
+                                          decoration: InputDecoration(
+                                            counterText: "",
+                                            contentPadding: EdgeInsets.fromLTRB(
+                                                16, 12, 16, 0),
+                                            hintText: "Mobile Number",
+                                            prefixIcon: Icon(Icons.call),
+                                            hintStyle: TextStyle(
+                                                color:
+                                                    social_textColorSecondary,
+                                                fontSize: textSizeMedium),
+                                            border: InputBorder.none,
+                                          ),
+                                          controller: phone,
+                                          validator: (val) =>
+                                              val.length != 10 ? "" : null,
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              )
-                            ],
+                                SizedBox(height: spacing_large),
+                                SocialAppButton(
+                                  onPressed: () {
+                                    if (_formKey.currentState.validate()) {
+                                      setState(() => error = "");
+                                      loadDialog(phone);
+                                      _verifyPhone(phone, context);
+                                    } else {
+                                      setState(() => error =
+                                          "Please enter a valid Phone Number");
+                                    }
+                                  },
+                                  textContent: "Continue",
+                                ),
+                              ],
+                            ),
                           ),
-                          SizedBox(height: spacing_large),
-                          SocialAppButton(
-                            onPressed: () {
-                              if (_formKey.currentState.validate()) {
-                                setState(() => error = "");
-                                loadDialog(phone);
-                                _verifyPhone(phone,context);
-                              } else {
-                                setState(() => error =
-                                    "Please enter a valid Phone Number");
-                              }
-                            },
-                            textContent: "Continue",
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
+                    )
+                  ],
                 ),
-              )
-            ],
-          ),
-          Container(
-            margin: EdgeInsets.only(bottom: spacing_standard_new),
-            alignment: Alignment.bottomCenter,
-            child: text(
-                "Your form submission is subjected \n to our Privacy and Policy",
-                textColor: social_textColorSecondary,
-                isCentered: true,
-                isLongText: true),
-          )
-        ],
-      )),
+                Container(
+                  margin: EdgeInsets.only(bottom: spacing_standard_new),
+                  alignment: Alignment.bottomCenter,
+                  child: text(
+                      "Your form submission is subjected \n to our Privacy and Policy",
+                      textColor: social_textColorSecondary,
+                      isCentered: true,
+                      isLongText: true),
+                )
+              ],
+            )),
     );
   }
 }

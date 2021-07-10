@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chatapp/auth/authentication.dart';
+import 'package:chatapp/screens/photo.dart';
 import 'package:chatapp/screens/settings.dart';
 import 'package:chatapp/utils/colors.dart';
 import 'package:chatapp/utils/constants.dart';
@@ -30,6 +32,34 @@ BoxDecoration boxDecoration({double radius = spacing_middle, Color color = Color
     boxShadow: showShadow ? [BoxShadow(color: social_ShadowColor, blurRadius: 10, spreadRadius: 2)] : [BoxShadow(color: Colors.transparent)],
     border: Border.all(color: color),
     borderRadius: BorderRadius.all(Radius.circular(radius)),
+  );
+}
+
+Widget imageMessage(context,imageUrlFromFB) {
+  return Container(
+    width: 160,
+    height: 160,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    child: GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => FullPhoto(url: imageUrlFromFB)));
+      },
+      child: CachedNetworkImage(
+        imageUrl: imageUrlFromFB,
+        placeholder: (context, url) => Container(
+          transform: Matrix4.translationValues(0, 0, 0),
+          child: Container( width: 60, height: 80,
+              child: Center(child: new CircularProgressIndicator())),
+        ),
+        errorWidget: (context, url, error) => new Icon(Icons.error),
+        width: 60,
+        height: 80,
+        fit: BoxFit.cover,
+      ),
+    ),
   );
 }
 
@@ -250,4 +280,40 @@ BoxDecoration boxDecorations(
           : [BoxShadow(color: Colors.transparent)],
       border: Border.all(color: color),
       borderRadius: BorderRadius.all(Radius.circular(radius)));
+}
+
+class CustomImage extends StatelessWidget {
+  String img;
+  CustomImage({this.img});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 0.0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: <Widget>[
+            ClipRRect(
+                child: CachedNetworkImage(
+                    imageUrl: img, fit: BoxFit.cover, height: 250),
+                borderRadius: BorderRadius.circular(8)),
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                  padding: EdgeInsets.all(16),
+                  child: Icon(Icons.close, color: Colors.black)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

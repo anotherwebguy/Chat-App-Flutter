@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chatapp/services/dbdata.dart';
 import 'package:chatapp/utils/extensions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,16 +9,17 @@ import 'package:chatapp/utils/colors.dart';
 import 'package:chatapp/utils/constants.dart';
 import 'package:chatapp/utils/widgets.dart';
 import 'package:random_string/random_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SocialChatting extends StatefulWidget {
-  static String tag = '/SocialChatting';
+  String name,uid,phone;
+  SocialChatting({this.name,this.uid,this.phone});
 
   @override
   SocialChattingState createState() => SocialChattingState();
 }
 
 class SocialChattingState extends State<SocialChatting> {
-
   String chatRoomId, messageId = "";
   Stream messageStream;
 
@@ -31,18 +33,18 @@ class SocialChattingState extends State<SocialChatting> {
     }
   }
 
-  addTheMessage(bool sendClicked) {
+  addTheMessage() {
     if (chatmessage.text != "") {
-      String message = chatmessage.text;
 
       var lastMessageTs = DateTime.now();
 
       Map<String, dynamic> messageInfoMap = {
-        "message": message,
+        "message": chatmessage.text,
         "sendBy": FirebaseAuth.instance.currentUser.uid,
         "ts": lastMessageTs,
         "imgUrl": profileimg,
-        "type": "message"
+        "type": "message",
+        "isRead": false,
       };
 
       //messageId
@@ -50,22 +52,14 @@ class SocialChattingState extends State<SocialChatting> {
         messageId = randomAlphaNumeric(12);
       }
 
-      addMessage(chatRoomId, messageId, messageInfoMap)
-          .then((value) {
+      addMessage(chatRoomId, messageId, messageInfoMap).then((value) {
         Map<String, dynamic> lastMessageInfoMap = {
-          "lastMessage": message,
+          "lastMessage": chatmessage.text,
           "lastMessageSendTs": lastMessageTs,
           "lastMessageSendBy": FirebaseAuth.instance.currentUser.uid,
         };
 
         updateLastMessageSend(chatRoomId, lastMessageInfoMap);
-
-        if (sendClicked) {
-          // remove the text in the message input field
-          chatmessage.text = "";
-          // make message id blank to get regenerated on next message send
-          messageId = "";
-        }
       });
     }
   }
@@ -85,9 +79,10 @@ class SocialChattingState extends State<SocialChatting> {
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
 
-    Widget buildChatMessages(
-        String msg, String type, String time, String fromid) {
-      if (fromid == FirebaseAuth.instance.currentUser.uid && type=="message") {
+    Widget buildChatMessages(String msg, String type, String time,
+        String fromid, String image, bool isRead) {
+      if (fromid == FirebaseAuth.instance.currentUser.uid &&
+          type == "message") {
         return Container(
           margin: EdgeInsets.only(
               right: spacing_standard_new, bottom: spacing_standard),
@@ -104,11 +99,13 @@ class SocialChattingState extends State<SocialChatting> {
                         topRight: Radius.circular(10),
                         topLeft: Radius.circular(10),
                         bottomLeft: Radius.circular(10))),
-                child: text(msg,
-                    textColor: social_white,
-                    fontSize: textSizeMedium,
-                    fontFamily: fontMedium,
-                    isLongText: true),
+                child: type == 'message'
+                    ? text(msg,
+                        textColor: social_white,
+                        fontSize: textSizeMedium,
+                        fontFamily: fontMedium,
+                        isLongText: true)
+                    : imageMessage(context, msg),
               ),
               RichText(
                 text: TextSpan(
@@ -134,28 +131,114 @@ class SocialChattingState extends State<SocialChatting> {
             ],
           ),
         );
-      } else if (fromid != FirebaseAuth.instance.currentUser.uid && type=="message") {
-        return Row(
-          children: <Widget>[
-            Container(
-                margin: EdgeInsets.only(left: spacing_standard_new),
-                padding: EdgeInsets.all(spacing_standard),
-                decoration: BoxDecoration(
-                  color: social_app_background_color,
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                      topLeft: Radius.circular(10)),
+      } else if (fromid != FirebaseAuth.instance.currentUser.uid &&
+          type == "message") {
+        final size = MediaQuery.of(context).size;
+        return Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Container(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24.0),
+                          child: CachedNetworkImage(
+                            imageUrl: image,
+                            placeholder: (context, url) => Container(
+                              transform:
+                                  Matrix4.translationValues(0.0, 0.0, 0.0),
+                              child: Container(
+                                  width: 60,
+                                  height: 60,
+                                  child: Center(
+                                      child: new CircularProgressIndicator())),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                new Icon(Icons.error),
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(name),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
+                              child: Container(
+                                constraints:
+                                    BoxConstraints(maxWidth: size.width - 150),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(
+                                      type == 'message' ? 10.0 : 0),
+                                  child: Container(
+                                      child: type == 'message'
+                                          ? Text(
+                                              msg,
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            )
+                                          : imageMessage(context, msg)),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(bottom: 14.0, left: 4),
+                              child: Text(
+                                time,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                width: MediaQuery.of(context).size.width * 0.5,
-                child: text(msg,
-                    textColor: social_textColorPrimary,
-                    fontSize: textSizeMedium,
-                    maxLine: 3,
-                    fontFamily: fontMedium,
-                    isLongText: true))
-          ],
+              ],
+            ),
+          ),
         );
+        // return Row(
+        //   children: <Widget>[
+        //     Container(
+        //         margin: EdgeInsets.only(left: spacing_standard_new),
+        //         padding: EdgeInsets.all(spacing_standard),
+        //         decoration: BoxDecoration(
+        //           color: social_app_background_color,
+        //           borderRadius: BorderRadius.only(
+        //               topRight: Radius.circular(10),
+        //               bottomRight: Radius.circular(10),
+        //               topLeft: Radius.circular(10)),
+        //         ),
+        //         width: MediaQuery.of(context).size.width * 0.5,
+        //         child: text(msg,
+        //             textColor: social_textColorPrimary,
+        //             fontSize: textSizeMedium,
+        //             maxLine: 3,
+        //             fontFamily: fontMedium,
+        //             isLongText: true))
+        //   ],
+        // );
       } else if (type == "Media") {
         return Row(
           children: <Widget>[
@@ -180,6 +263,25 @@ class SocialChattingState extends State<SocialChatting> {
       } else {
         return SizedBox();
       }
+    }
+
+    Widget chatMessages() {
+      return StreamBuilder(
+        stream: messageStream,
+        builder: (context, snapshot) {
+          return snapshot.hasData
+              ? ListView.builder(
+                  padding: EdgeInsets.only(bottom: 70, top: 16),
+                  itemCount: snapshot.data.docs.length,
+                  reverse: true,
+                  itemBuilder: (context, index) {
+                    DocumentSnapshot ds = snapshot.data.docs[index];
+                    return buildChatMessages(ds["message"], ds["type"],
+                        ds["ts"], ds["sendBy"], ds["imageUrl"], ds["isRead"]);
+                  })
+              : Center(child: CircularProgressIndicator());
+        },
+      );
     }
 
     var mToolbar = Container(
@@ -228,7 +330,9 @@ class SocialChattingState extends State<SocialChatting> {
             children: <Widget>[
               IconButton(
                   icon: Icon(Icons.call, color: social_textColorPrimary),
-                  onPressed: null),
+                  onPressed: () async{
+                    await launch("tel:${widget.phone}");
+                  }),
             ],
           )
         ],
@@ -246,13 +350,7 @@ class SocialChattingState extends State<SocialChatting> {
                 children: <Widget>[
                   mToolbar,
                   SizedBox(height: spacing_standard_new),
-                  // ListView.builder(
-                  //   itemBuilder: (context, i) =>
-                  //       buildChatMessages(getUserChats()[i]),
-                  //   itemCount: getUserChats().length,
-                  //   physics: NeverScrollableScrollPhysics(),
-                  //   shrinkWrap: true,
-                  // ),
+                  chatMessages(),
                 ],
               ),
             ),
@@ -272,7 +370,9 @@ class SocialChattingState extends State<SocialChatting> {
                     Expanded(
                       child: TextFormField(
                         style: TextStyle(
-                            fontSize: textSizeLargeMedium, fontFamily: fontRegular),
+                            fontSize: textSizeLargeMedium,
+                            fontFamily: fontRegular),
+                        controller: chatmessage,
                         decoration: InputDecoration(
                             hintText: "Type a message",
                             contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 10),
@@ -280,11 +380,17 @@ class SocialChattingState extends State<SocialChatting> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    SvgPicture.asset(
-                      "images/social_send.svg",
-                      color: social_icon_color,
-                      height: 50,
-                      width: 50,
+                    GestureDetector(
+                      onTap: () {
+                        addTheMessage();
+                        chatmessage.text="";
+                      },
+                      child: SvgPicture.asset(
+                        "images/social_send.svg",
+                        color: social_icon_color,
+                        height: 50,
+                        width: 50,
+                      ),
                     ),
                     SizedBox(width: 0),
                   ],

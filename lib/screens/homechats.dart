@@ -26,7 +26,7 @@ class SocialHomeChatsState extends State<SocialHomeChats> {
   }
 
   getChatRooms() async {
-    chatRoomsStream = await getChatRooms();
+    chatRoomsStream = await getTheChatRooms();
     setState(() {});
   }
 
@@ -119,16 +119,15 @@ class SocialHomeChatsState extends State<SocialHomeChats> {
 }
 
 class Chats extends StatefulWidget {
-  final String lastMessage, chatRoomId, myUsername,time;
-  Chats({this.lastMessage, this.chatRoomId, this.myUsername,this.time});
+  final String lastMessage, chatRoomId, myUsername, time;
+  Chats({this.lastMessage, this.chatRoomId, this.myUsername, this.time});
 
   @override
   _ChatsState createState() => _ChatsState();
 }
 
 class _ChatsState extends State<Chats> {
-
-  String profilePicUrl = "", name = "", username = "";
+  String profilePicUrl = "", name = "", username = "",phone="";
 
   getThisUserInfo() async {
     username =
@@ -138,6 +137,7 @@ class _ChatsState extends State<Chats> {
         "something bla bla ${querySnapshot.docs[0].id} ${querySnapshot.docs[0]["username"]}  ${querySnapshot.docs[0]["profileimg"]}");
     name = "${querySnapshot.docs[0]["username"]}";
     profilePicUrl = "${querySnapshot.docs[0]["profileimg"]}";
+    phone="${querySnapshot.docs[0]["phone"]}";
     setState(() {});
   }
 
@@ -154,7 +154,7 @@ class _ChatsState extends State<Chats> {
       onTap: () {
         //launchScreen(context, SocialChatting.tag);
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SocialChatting()));
+            context, MaterialPageRoute(builder: (context) => SocialChatting(name: name,uid: username,phone:phone)));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: spacing_standard_new),
@@ -164,18 +164,26 @@ class _ChatsState extends State<Chats> {
             Expanded(
               child: Row(
                 children: <Widget>[
-                  ClipRRect(
-                      borderRadius:
-                          BorderRadius.all(Radius.circular(spacing_middle)),
-                      child: Container(
-                        color: social_dark_gray,
-                        child: CachedNetworkImage(
-                          imageUrl: profilePicUrl, ////addimage
-                          height: width * 0.13,
-                          width: width * 0.13,
-                          fit: BoxFit.fill,
-                        ),
-                      )),
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => CustomImage(img: profilePicUrl,),
+                      );
+                    },
+                    child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.all(Radius.circular(spacing_middle)),
+                        child: Container(
+                          color: social_dark_gray,
+                          child: CachedNetworkImage(
+                            imageUrl: profilePicUrl, ////addimage
+                            height: width * 0.13,
+                            width: width * 0.13,
+                            fit: BoxFit.fill,
+                          ),
+                        )),
+                  ),
                   SizedBox(
                     width: spacing_middle,
                   ),
@@ -197,7 +205,9 @@ class _ChatsState extends State<Chats> {
               ),
             ),
             SizedBox(width: spacing_standard),
-            text(widget.time, fontFamily: fontMedium, fontSize: textSizeSMedium),
+            text(widget.time,
+                fontFamily: fontMedium, fontSize: textSizeSMedium),
+
             /// last msg time
           ],
         ),
@@ -205,3 +215,5 @@ class _ChatsState extends State<Chats> {
     );
   }
 }
+
+

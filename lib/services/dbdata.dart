@@ -90,7 +90,7 @@ Future<Stream<QuerySnapshot>> getUserByUid(String uid) async {
         .snapshots();
   }
 
-  Future<Stream<QuerySnapshot>> getChatRooms() async {
+  Future<Stream<QuerySnapshot>> getTheChatRooms() async {
     String myUid = FirebaseAuth.instance.currentUser.uid;
     return FirebaseFirestore.instance
         .collection("chatrooms")

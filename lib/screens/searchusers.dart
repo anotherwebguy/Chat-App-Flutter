@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chatapp/screens/chatting.dart';
+import 'package:chatapp/services/dbdata.dart';
 import 'package:chatapp/utils/colors.dart';
 import 'package:chatapp/utils/constants.dart';
 import 'package:chatapp/utils/widgets.dart';
@@ -15,6 +17,14 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   String Searchstring;
   TextEditingController textEditingController = TextEditingController();
+
+  getChatRoomIdByUid(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +101,16 @@ class _SearchState extends State<Search> {
               Column(children: [
                 StreamBuilder<QuerySnapshot>(
                   stream: (Searchstring == null || Searchstring.trim() == '')
-                      ? FirebaseFirestore.instance.collection("users").where("uid", isNotEqualTo: FirebaseAuth.instance.currentUser.uid).snapshots()
+                      ? FirebaseFirestore.instance
+                          .collection("users")
+                          .where("uid",
+                              isNotEqualTo:
+                                  FirebaseAuth.instance.currentUser.uid)
+                          .snapshots()
                       : FirebaseFirestore.instance
                           .collection("users")
                           .where('searchString',
-                              arrayContains: Searchstring.toLowerCase())    
+                              arrayContains: Searchstring.toLowerCase())
                           .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
@@ -123,20 +138,26 @@ class _SearchState extends State<Search> {
 
                       default:
                         return Container(
-                              decoration: boxDecoration(radius: spacing_middle),
-                              padding: EdgeInsets.all(spacing_middle),
-                              child: ListView.builder(
-                                  scrollDirection: Axis.vertical,
-                                  itemCount: snapshot.data.docs.length,
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemBuilder: (context, index) {
-                                    DocumentSnapshot chatlist =
-                                        snapshot.data.docs[index];
-                                    print(snapshot.data.docs[index].id);
-                                    return Chats(name: chatlist.data()['username'],status: chatlist.data()['status'],img: chatlist.data()['profileimg'] ,);
-                                  }),
-                            );
+                          decoration: boxDecoration(radius: spacing_middle),
+                          padding: EdgeInsets.all(spacing_middle),
+                          child: ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              itemCount: snapshot.data.docs.length,
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                DocumentSnapshot chatlist =
+                                    snapshot.data.docs[index];
+                                print(snapshot.data.docs[index].id);
+                                return Chats(
+                                  name: chatlist.data()['username'],
+                                  status: chatlist.data()['status'],
+                                  img: chatlist.data()['profileimg'],
+                                  uid: chatlist.data()['uid'],
+                                  phn: chatlist.data()['phone'],
+                                );
+                              }),
+                        );
                     }
                   },
                 ),
@@ -149,17 +170,41 @@ class _SearchState extends State<Search> {
   }
 }
 
-class Chats extends StatelessWidget {
-  String name,status,img;
+class Chats extends StatefulWidget {
+  String name, status, img, uid, phn;
 
-  Chats({this.name,this.status,this.img});
+  Chats({this.name, this.status, this.img, this.uid, this.phn});
+
+  @override
+  _ChatsState createState() => _ChatsState();
+}
+
+class _ChatsState extends State<Chats> {
+  getChatRoomIdByUsernames(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         //launchScreen(context, SocialChatting.tag);
+        var chatRoomId = getChatRoomIdByUsernames(
+            FirebaseAuth.instance.currentUser.uid, widget.uid);
+        Map<String, dynamic> chatRoomInfoMap = {
+          "users": [FirebaseAuth.instance.currentUser.uid, widget.uid]
+        };
+        await createChatRoom(chatRoomId, chatRoomInfoMap);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => SocialChatting(
+                    name: name, uid: widget.uid, phone: widget.phn)));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: spacing_standard_new),
@@ -169,18 +214,28 @@ class Chats extends StatelessWidget {
             Expanded(
               child: Row(
                 children: <Widget>[
-                  ClipRRect(
-                      borderRadius:
-                          BorderRadius.all(Radius.circular(spacing_middle)),
-                      child: Container(
-                        color: social_dark_gray,
-                        child: CachedNetworkImage(
-                          imageUrl: img, ////addimage
-                          height: width * 0.13,
-                          width: width * 0.13,
-                          fit: BoxFit.fill,
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => CustomImage(
+                          img: widget.img,
                         ),
-                      )),
+                      );
+                    },
+                    child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.all(Radius.circular(spacing_middle)),
+                        child: Container(
+                          color: social_dark_gray,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.img, ////addimage
+                            height: width * 0.13,
+                            width: width * 0.13,
+                            fit: BoxFit.fill,
+                          ),
+                        )),
+                  ),
                   SizedBox(
                     width: spacing_middle,
                   ),
@@ -188,9 +243,13 @@ class Chats extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        text(name, fontFamily: fontMedium),///add name
+                        text(widget.name, fontFamily: fontMedium),
+
+                        ///add name
                         text(
-                          status,              ///addd last msg
+                          widget.status,
+
+                          ///addd last msg
                           textColor: social_textColorSecondary,
                         )
                       ],
@@ -199,7 +258,7 @@ class Chats extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: spacing_standard),// last msg time
+            SizedBox(width: spacing_standard), // last msg time
           ],
         ),
       ),

@@ -19,6 +19,8 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
   var mMyStatusLabel = text("MY Status", fontFamily: fontMedium);
   var mFriendsLabel = text("Friends", fontFamily: fontMedium);
 
+  var val= DateTime.now().hour<12?"AM":"PM";
+
   Widget mStatus() {
     var width = MediaQuery.of(context).size.width;
     return Container(
@@ -74,7 +76,7 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
           text(
               DateTime.now().hour.toString() +
                   ":" +
-                  DateTime.now().minute.toString(),
+                  DateTime.now().minute.toString()+" "+val,
               fontFamily: fontMedium,
               fontSize: textSizeSMedium),
         ],
