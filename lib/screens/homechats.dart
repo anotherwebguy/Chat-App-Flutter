@@ -65,7 +65,7 @@ class SocialHomeChatsState extends State<SocialHomeChats> {
                   scrollDirection: Axis.vertical,
                   itemCount: snapshot.data.docs.length,
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: ScrollPhysics(),
                   itemBuilder: (context, index) {
                     DocumentSnapshot chatlist = snapshot.data.docs[index];
                     print(snapshot.data.docs[index].id);
@@ -227,7 +227,7 @@ class _ChatsState extends State<Chats> {
                                 ),
                               ),
                               TextSpan(
-                                  text: widget.lastMessage,
+                                  text: widget.lastMessage.length>15?widget.lastMessage.substring(0,15)+"...":widget.lastMessage,
                                   style: TextStyle(
                                       fontSize: textSizeMedium,
                                       color: social_textColorSecondary)),

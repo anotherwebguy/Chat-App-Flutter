@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chatapp/screens/storypage.dart';
 import 'package:chatapp/services/dbdata.dart';
 import 'package:chatapp/utils/colors.dart';
 import 'package:chatapp/utils/constants.dart';
@@ -6,9 +9,12 @@ import 'package:chatapp/utils/dashedcircle.dart';
 import 'package:chatapp/utils/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as Path;
 
 class SocialHomeStatus extends StatefulWidget {
   @override
@@ -19,7 +25,53 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
   var mMyStatusLabel = text("MY Status", fontFamily: fontMedium);
   var mFriendsLabel = text("Friends", fontFamily: fontMedium);
 
-  var val= DateTime.now().hour<12?"AM":"PM";
+  File img1;
+  String path1 = "";
+
+  Future getProfileImage() async {
+    final pickedFile = await ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50);
+    setState(() {
+      if (pickedFile != null) {
+        path1 = pickedFile.path;
+        img1 = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
+    if (img1 != null) {
+      await uploadProfileImg();
+    }
+  }
+
+  Future uploadProfileImg() async {
+    StorageReference storageReference = FirebaseStorage.instance.ref().child(
+        'status/${FirebaseAuth.instance.currentUser.uid}/images/${Path.basename(img1.path)}');
+    StorageUploadTask uploadTask = storageReference.putFile(img1);
+    await uploadTask.onComplete;
+    print('File Uploaded');
+    storageReference.getDownloadURL().then((fileURLTwo) {
+      setState(() {
+        path1 = fileURLTwo;
+        print(path1);
+        addStatus();
+      });
+    });
+  }
+
+  Future<void> addStatus() async {
+    await FirebaseFirestore.instance
+        .collection('status')
+        .doc(FirebaseAuth.instance.currentUser.uid)
+        .set({
+          'name': name,
+          'profileimg': profileimg,
+          'passimage': path1,
+          'time': DateTime.now()
+        });
+  }
+
+  var val = DateTime.now().hour < 12 ? "AM" : "PM";
 
   Widget mStatus() {
     var width = MediaQuery.of(context).size.width;
@@ -32,8 +84,9 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
           Row(
             children: <Widget>[
               GestureDetector(
-                onTap: () {
+                onTap: () async {
                   //launchScreen(context, SocialGallery.tag);
+                  getProfileImage();
                 },
                 child: Stack(
                   alignment: Alignment.bottomRight,
@@ -76,7 +129,9 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
           text(
               DateTime.now().hour.toString() +
                   ":" +
-                  DateTime.now().minute.toString()+" "+val,
+                  DateTime.now().minute.toString() +
+                  " " +
+                  val,
               fontFamily: fontMedium,
               fontSize: textSizeSMedium),
         ],
@@ -115,7 +170,9 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
                   StreamBuilder(
                       stream: FirebaseFirestore.instance
                           .collection('status')
-                          .where("uid", isNotEqualTo:FirebaseAuth.instance.currentUser.uid)
+                          .where("name",
+                              isNotEqualTo:
+                                  name)
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
@@ -153,7 +210,12 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
                                     DocumentSnapshot statuslist =
                                         snapshot.data.docs[index];
                                     print(snapshot.data.docs[index].id);
-                                    return Friends();
+                                    return Friends(
+                                      name: statuslist.data()['name'],
+                                      image: statuslist.data()['profileimg'],
+                                      passimage: statuslist.data()['passimage'],
+                                      time: statuslist.data()['time'],
+                                    );
                                   }),
                             );
                         }
@@ -168,51 +230,85 @@ class SocialHomeStatusState extends State<SocialHomeStatus> {
   }
 }
 
-class Friends extends StatelessWidget {
+class Friends extends StatefulWidget {
+  String name, image, passimage;
+  Timestamp time;
+
+  Friends({this.name, this.image, this.passimage, this.time});
+
+  @override
+  _FriendsState createState() => _FriendsState();
+}
+
+class _FriendsState extends State<Friends> {
+  var val = "", msgtime = "";
+  @override
+  void initState() {
+    var date =
+        DateTime.fromMillisecondsSinceEpoch(widget.time.millisecondsSinceEpoch);
+    val = date.hour < 12 ? "AM" : "PM";
+    msgtime = date.hour.toString() + " : " + date.minute.toString() + " " + val;
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
-    return Container(
-      margin: EdgeInsets.only(bottom: spacing_standard_new),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              DashedCircle(
-                dashes: 7,
-                child: Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: CircleAvatar(
-                      radius: 15.0,
-                      child: Container(
-                        color: social_white,
-                        child: CachedNetworkImage(
-                          imageUrl:" model.image", ///add image
-                          height: width * 0.2,
-                          width: width * 0.2,
-                          fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => StoryPageView(
+                      image: widget.passimage,
+                    )));
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: spacing_standard_new),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                DashedCircle(
+                  dashes: 7,
+                  child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: CircleAvatar(
+                        radius: 15.0,
+                        child: Container(
+                          color: social_white,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.image,
+
+                            ///add image
+                            height: width * 0.2,
+                            width: width * 0.2,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                    )),
-                color: social_colorPrimary,
-              ),
-              SizedBox(
-                width: spacing_middle,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  text("model.name", fontFamily: fontMedium), ///addd mame
-                  
-                ],
-              ),
-            ],
-          ),
-          text("model.duration",//add time
-              fontFamily: fontMedium, fontSize: textSizeSMedium),
-        ],
+                      )),
+                  color: social_colorPrimary,
+                ),
+                SizedBox(
+                  width: spacing_middle,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    text(widget.name, fontFamily: fontMedium),
+
+                    ///addd mame
+                  ],
+                ),
+              ],
+            ),
+            text(msgtime, //add time
+                fontFamily: fontMedium,
+                fontSize: textSizeSMedium),
+          ],
+        ),
       ),
     );
   }

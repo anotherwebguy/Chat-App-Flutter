@@ -100,21 +100,21 @@ class _QIBusCountryCodePickerState extends State<CountryCodePicker> {
           direction: Axis.horizontal,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-           widget.showFlag
-               ? Flexible(
-                   flex: widget.alignLeft ? 0 : 1,
-                   fit: widget.alignLeft ? FlexFit.tight : FlexFit.loose,
-                   child: Padding(
-                     padding: widget.alignLeft
-                         ? const EdgeInsets.only(right: 8.0, left: 8.0)
-                         : const EdgeInsets.only(right: 8.0),
-                     child: Image.network(
-                       selectedItem.flagUri,
-                       width: 25.0,
-                     ),
-                   ),
-                 )
-               : Container(),
+          //  widget.showFlag
+          //      ? Flexible(
+          //          flex: widget.alignLeft ? 0 : 1,
+          //          fit: widget.alignLeft ? FlexFit.tight : FlexFit.loose,
+          //          child: Padding(
+          //            padding: widget.alignLeft
+          //                ? const EdgeInsets.only(right: 8.0, left: 8.0)
+          //                : const EdgeInsets.only(right: 8.0),
+          //            child: Image.network(
+          //              selectedItem.flagUri,
+          //              width: 25.0,
+          //            ),
+          //          ),
+          //        )
+          //      : Container(),
             Flexible(
               // fit: widget.alignLeft ? FlexFit.tight : FlexFit.loose,
               child: text(selectedItem.toCountryCodeString(),
