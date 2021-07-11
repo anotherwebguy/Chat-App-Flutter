@@ -114,6 +114,6 @@ We follow certain guidelines in order to maintain this repository. Please find o
 
 <h2 align= "left"><b>License</b></h2>
 
-Distributed under the GPL-3.0 License. See [LICENSE](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/LICENSE) for more information.
+Distributed under the MIT License. See [LICENSE](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/LICENSE) for more information.
 
 
