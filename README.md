@@ -1,5 +1,3 @@
-![Screenshot_2021-07-11-13-29-34-617_com example chatapp]()
-
 
 <p align="center" width="100%">
   <img src="https://user-images.githubusercontent.com/66346161/125189646-ba900e80-e256-11eb-9d56-d76cd04aef33.png"/>
