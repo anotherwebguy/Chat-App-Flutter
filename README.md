@@ -134,7 +134,7 @@ click on `Compare and Pull Request`
 
 <h2 align= "left"><b>Code of Conduct</b></h2>
 
-We follow certain guidelines in order to maintain this repository. Please find our [code of conduct](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/CODE_OF_CONDUCT.md) and read it carefully.
+I follow certain guidelines in order to maintain this repository. Please find the [code of conduct](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/CODE_OF_CONDUCT.md) and read it carefully.
 
 <h2 align= "left"><b>License</b></h2>
 
