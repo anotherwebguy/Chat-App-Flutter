@@ -24,6 +24,11 @@ The chat function is used in many apps. Flutter allows you to create iPhone and 
 <img src="https://img.shields.io/badge/dart-%230175C2.svg?&style=for-the-badge&logo=dart&logoColor=white"/>  <img src="https://img.shields.io/badge/flutter-%230175C2.svg?&style=for-the-badge&logo=flutter&logoColor=white"/>  <img src="https://img.shields.io/badge/firebase-%230175C2.svg?&style=for-the-badge&logo=firebase&logoColor=white"/>
 </div>
 
+## Demo 
+
+https://user-images.githubusercontent.com/66346161/125193501-4a8b8380-e26a-11eb-98f0-f2ed51372f8a.mp4
+
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
@@ -115,5 +120,9 @@ We follow certain guidelines in order to maintain this repository. Please find o
 <h2 align= "left"><b>License</b></h2>
 
 Distributed under the MIT License. See [LICENSE](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/LICENSE) for more information.
+
+
+
+
 
 
