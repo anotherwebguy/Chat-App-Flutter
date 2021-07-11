@@ -1,5 +1,6 @@
-p align="center" width="100%">
-  <img src="https://user-images.githubusercontent.com/66346161/122631232-e6045b00-d0e7-11eb-8343-04c16ef7a74c.png"/>
+
+<p align="center" width="100%">
+  <img src="https://user-images.githubusercontent.com/66346161/125189646-ba900e80-e256-11eb-9d56-d76cd04aef33.png"/>
 </p>  
 <h1 align="center">🔥🔥Chatfire chat app🔥🔥</h1> <br><h3 align="center"> ----Personal Portfolio website made using Flutter web---- </h3>
 
