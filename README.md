@@ -37,6 +37,18 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+<h2 align= "left"><b>Contributing Guidelines!</b></h2>
+
+1. Make sure to keep the UI consistent while adding a new feature.
+2. When adding new packages, use the package version which is compatible with the new flutter 2 update.
+3. Make sure that your code is well documented, especially in the tougher areas.
+4. Maintain a uniform naming convention throughout the codebase.
+5. If your code is being repetitive then refactor it to create a new widget for future use.
+6. Make the code as modular as possible, separating the UI from the logic.
+
+Contributions are always welcome! You can also visit our [contributing guidelines](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/CONTRIBUTING.md) beforing making any contributions. 
+
+
 <h2 align= "left"><b>Steps</b></h2>
 
 ![Steps](https://media.giphy.com/media/o5BzNDDFQnepi/giphy.gif)
@@ -95,4 +107,13 @@ click on `Compare and Pull Request`
 <img src="https://user-images.githubusercontent.com/41269164/70219836-8d6ea680-176b-11ea-81d5-549093bf0954.png" width=600>
 
 **Congratulations!!**  :boom: Sit and relax, you've made your contribution to [Chatfire](https://github.com/anotherwebguy/Chat-App-Flutter) project.
+
+<h2 align= "left"><b>Code of Conduct</b></h2>
+
+We follow certain guidelines in order to maintain this repository. Please find our [code of conduct](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/CODE_OF_CONDUCT.md) and read it carefully.
+
+<h2 align= "left"><b>License</b></h2>
+
+Distributed under the GPL-3.0 License. See [LICENSE](https://github.com/anotherwebguy/Chat-App-Flutter/blob/master/LICENSE) for more information.
+
 
