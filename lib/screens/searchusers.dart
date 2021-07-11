@@ -207,7 +207,7 @@ class _ChatsState extends State<Chats> {
             context,
             MaterialPageRoute(
                 builder: (context) => SocialChatting(
-                    name: name, uid: widget.uid, phone: widget.phn,image: widget.img,)));
+                    name: widget.name, uid: widget.uid, phone: widget.phn,image: widget.img,)));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: spacing_standard_new),

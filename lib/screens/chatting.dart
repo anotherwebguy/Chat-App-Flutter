@@ -251,7 +251,7 @@ class SocialChattingState extends State<SocialChatting> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(name),
+                        Text(widget.name),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.end,
